@@ -568,13 +568,22 @@ function loadData(mag) {
   };
 }
 
-function saveData() {
+async function saveData() {
   const k = key(currentMag);
   const d = collectData();
   localStorage.setItem(k, JSON.stringify(d));
   const el = document.getElementById('save-ok');
   el.style.display = 'inline';
   setTimeout(()=>el.style.display='none', 2500);
+  try{await sendToGoogleSheet();}catch(e){console.error(e)}
+}
+
+
+async function sendToGoogleSheet(){
+ const d=collectData();
+ const payload={commercial:currentMag.n,magasin:currentMag.mag,enseigne:currentMag.ens,implantation:d.impl,reserve:d.rese,arret:d.arret,passages:d.passages};
+ const r=await fetch("https://script.google.com/macros/s/AKfycbzJRtt3FEG2A-OuZfNSYJfwMSAYsn_xXYCCxwnF88GHwydga_Dhtt0MhKq_bcLSKiVSrA/exec",{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+ return await r.text();
 }
 
 function collectData() {
